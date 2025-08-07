@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Real-Time Location Tracker</title>
+</head>
+<body>
+    <h1>📍 Track My Location</h1>
+    <button onclick="getLocation()">Get My Location</button>
+    <p id="status"></p>
+
+    <script>
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(success, error);
+            } else {
+                document.getElementById("status").innerText = "Geolocation is not supported.";
+            }
+        }
+
+        function success(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+
+            document.getElementById("status").innerText = `Latitude: ${lat}, Longitude: ${lon}`;
+
+            // Send to backend
+            fetch('/save_location', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    latitude: lat,
+                    longitude: lon
+                })
+            }).then(response => response.json())
+              .then(data => {
+                  document.getElementById("status").innerText += "\n" + data.message;
+                  window.open("/map", "_blank"); // Open map in new tab
+              });
+        }
+
+        function error(err) {
+            document.getElementById("status").innerText = "Error: " + err.message;
+        }
+    </script>
+</body>
+</html>
